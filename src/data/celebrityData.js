@@ -112,3 +112,22 @@ export const getCelebritiesByCategory = (category) => {
 export const findCelebrityByName = (name) => {
   return celebrityData.find(celebrity => celebrity.name === name);
 };
+
+// Add these functions to celebrityData.js
+export const saveCelebrityData = (newData) => {
+  // Implementation to save to file (note: browser security limitations)
+  console.log('Saving celebrity data:', newData);
+  localStorage.setItem('celebrityData', JSON.stringify(newData));
+};
+
+export const addNewCelebrity = (celebrity) => {
+  const updatedData = [...celebrityData, celebrity];
+  saveCelebrityData(updatedData);
+};
+
+export const updateCelebrity = (updatedCelebrity) => {
+  const updatedData = celebrityData.map(celeb => 
+    celeb.name === updatedCelebrity.name ? updatedCelebrity : celeb
+  );
+  saveCelebrityData(updatedData);
+};
