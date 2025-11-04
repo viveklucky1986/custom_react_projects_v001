@@ -1,0 +1,173 @@
+#!/usr/bin/env python3
+"""
+Fix React Vite Build Issues with Proper JSX Escaping
+"""
+
+import os
+import json
+from pathlib import Path
+
+def create_file(filepath, content):
+    """Create a file with the given content"""
+    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+    with open(filepath, 'w', encoding='utf-8') as f:
+        f.write(content)
+    print(f"Created/Updated: {filepath}")
+
+def main():
+    project_dir = Path("C:\\ContextMenuScripts\\ReactJS_Examples\\Custom Examples\\interactive-profile-app")
+    
+    # Fix 1: Update vite.config.js
+    vite_config = """import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import { resolve } from 'path'
+
+export default defineConfig({
+  plugins: [react()],
+  build: {
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html')
+      }
+    }
+  },
+  root: '.'
+})
+"""
+    
+    # Fix 2: Update index.html in root
+    index_html = """<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Interactive Profile App</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/index.js"></script>
+  </body>
+</html>
+"""
+    
+    # Fix 3: Update src/index.js with React.createElement
+    src_index = """import React from 'react'
+import ReactDOM from 'react-dom/client'
+import './index.css'
+import App from './App.js'
+
+const root = ReactDOM.createRoot(document.getElementById('root'))
+root.render(
+  React.createElement(React.StrictMode, null,
+    React.createElement(App, null)
+  )
+)
+"""
+    
+    # Fix 4: Update src/App.js with React.createElement
+    src_app = """import React, { useState } from 'react'
+import './App.css'
+
+function Profile() {
+  // Move user data to state so we can update it
+  const [user, setUser] = useState({
+    name: 'Hedy Lamarr',
+    imageUrl: 'https://i.imgur.com/yXOvdOSs.jpg',
+    imageSize: 90,
+  })
+
+  // Function to update name
+  const updateName = (newName) => {
+    setUser(prevUser => ({
+      ...prevUser,
+      name: newName
+    }))
+  }
+
+  // Function to update image URL
+  const updateImageUrl = (newUrl) => {
+    setUser(prevUser => ({
+      ...prevUser,
+      imageUrl: newUrl
+    }))
+  }
+
+  // Function to update image size
+  const updateImageSize = (newSize) => {
+    setUser(prevUser => ({
+      ...prevUser,
+      imageSize: parseInt(newSize) || 90
+    }))
+  }
+
+  return React.createElement('div', { className: 'profile-container' },
+    React.createElement('h1', null, user.name),
+    React.createElement('img', {
+      className: 'avatar',
+      src: user.imageUrl,
+      alt: 'Photo of ' + user.name,
+      style: {
+        width: user.imageSize,
+        height: user.imageSize
+      }
+    }),
+    React.createElement('div', { className: 'controls' },
+      React.createElement('div', { className: 'control-group' },
+        React.createElement('label', null, 'Name:'),
+        React.createElement('input', {
+          type: 'text',
+          value: user.name,
+          onChange: (e) => updateName(e.target.value),
+          placeholder: 'Enter name'
+        })
+      ),
+      React.createElement('div', { className: 'control-group' },
+        React.createElement('label', null, 'Image URL:'),
+        React.createElement('input', {
+          type: 'text',
+          value: user.imageUrl,
+          onChange: (e) => updateImageUrl(e.target.value),
+          placeholder: 'Enter image URL'
+        })
+      ),
+      React.createElement('div', { className: 'control-group' },
+        React.createElement('label', null, 'Image Size: ' + user.imageSize + 'px'),
+        React.createElement('input', {
+          type: 'range',
+          min: '50',
+          max: '200',
+          value: user.imageSize,
+          onChange: (e) => updateImageSize(e.target.value)
+        })
+      ),
+      React.createElement('div', { className: 'presets' },
+        React.createElement('button', {
+          onClick: () => updateName('Hedy Lamarr')
+        }, 'Reset Name'),
+        React.createElement('button', {
+          onClick: () => updateImageUrl('https://i.imgur.com/yXOvdOSs.jpg')
+        }, 'Reset Image'),
+        React.createElement('button', {
+          onClick: () => updateImageSize(90)
+        }, 'Reset Size')
+      )
+    )
+  )
+}
+
+export default Profile
+"""
+    
+    # Create the fixed files
+    create_file(project_dir / "vite.config.js", vite_config)
+    create_file(project_dir / "index.html", index_html)
+    create_file(project_dir / "src" / "index.js", src_index)
+    create_file(project_dir / "src" / "App.js", src_app)
+    
+    print("\\nFixed all build issues!")
+    print("Now run:")
+    print("pnpm build")
+
+if __name__ == "__main__":
+    main()
